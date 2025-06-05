@@ -43,30 +43,6 @@ public class Admin {
             }
         scanner.close();
         }
-//    private void viewProduct() {
-//        try (Connection connection = DBConnection.getConnection()) {
-//            String sql = "SELECT * FROM products";
-//            try (PreparedStatement statement = connection.prepareStatement(sql);
-//                 ResultSet resultSet = statement.executeQuery()) {
-//                System.out.println("List of Products:");
-//                while (resultSet.next()) {
-//                    int productId = resultSet.getInt("product_id");
-//                    String productName = resultSet.getString("product_name");
-//                    double price = resultSet.getDouble("price");
-//                    int stock = resultSet.getInt("stock");
-//                    String category = resultSet.getString("category");
-//                    System.out.print("Product ID: " + productId);
-//                    System.out.print(" Name: " + productName);
-//                    System.out.print(" Price: $" + price);
-//                    System.out.print(" Stock: " + stock);
-//                    System.out.println(" Category: "+ category);
-//                    System.out.println("-----------------------------------------------------------------------------------------");
-//                }
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
     private void viewProduct() {
         Scanner scanner = new Scanner(System.in);
 
