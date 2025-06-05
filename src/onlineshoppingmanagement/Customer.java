@@ -1,279 +1,4 @@
-//package onlineshoppingmanagement;
-//import java.sql.Connection;
-//import java.sql.DriverManager;
-//import java.sql.PreparedStatement;
-//import java.sql.ResultSet;
-//import java.sql.SQLException;
-//import java.time.LocalDateTime;
-//import com.mysql.cj.xdevapi.Statement;
-//import java.util.ArrayList;
-//import java.util.List;
-//import java.util.Scanner;
-//public class Customer {
-//    private List<Product> cart;
-//    private Connection connection;
-//
-//    public Customer() {
-//        this.cart = new ArrayList<>();
-//        try {
-//            this.connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/onlineShoppingManagement", "root", "subash@2003");
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    public void performCustomerProcesses() throws Exception {
-//        Scanner scanner = new Scanner(System.in);
-//        boolean shopping = true;
-//        while (shopping) {
-//            System.out.println("1. Display Products");
-//            System.out.println("2. Add to Cart");
-//            System.out.println("3. View Cart");
-//            System.out.println("4. Place Order");
-//            System.out.println("5. View Order");            
-//            System.out.println("6. Exit");
-//            System.out.print("Enter your choice: ");
-//            int choice = scanner.nextInt();
-//            if(choice==1) {
-//            	displayProducts();
-//            }
-//            else if(choice==2) {
-//            	  System.out.print("Enter product ID: ");
-//                  int productId = scanner.nextInt();
-//                  System.out.print("Enter quantity: ");
-//                  int quantity = scanner.nextInt();
-//                  System.out.println("Enter username: ");
-//                  String username=scanner.next();
-//                  addToCart(productId, quantity,username);
-//            }
-//            else if(choice==3)
-//            	viewCart();
-//            else if(choice==4)
-//            	placeOrder();
-//            else if(choice==5) {
-//            	String username=null;
-//            	viewOrder(username);
-//            }
-//            else if(choice==6) {
-//            	Main main=new Main();
-//            main.log();
-//        }
-//            else
-//            	System.out.println("Invalid");	
-//        }
-//       scanner.close();
-//    }
-//    public void displayProducts() {
-//        try {
-//            String sql = "SELECT * FROM products";
-//            PreparedStatement statement = connection.prepareStatement(sql);
-//            ResultSet resultSet = statement.executeQuery();
-//            System.out.println("Available Products:");
-//            while (resultSet.next()) {
-//                int productId = resultSet.getInt("product_id");
-//                String productName = resultSet.getString("product_name");
-//                double price = resultSet.getDouble("price");
-//                int stock = resultSet.getInt("stock");
-//                String category = resultSet.getString("category");
-//                System.out.print("Product ID: " + productId);
-//                System.out.print(" Name: " + productName);
-//                System.out.print(" Price: $" + price);
-//                System.out.print(" Stock: " + stock);
-//                System.out.println(" Category: " + category);
-//                System.out.println("-----------------------------------------------------------------------------------------");
-//            }
-//            resultSet.close();
-//            statement.close();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    public void addToCart(int productId, int quantity,String username) {
-//        try {
-//            String sql = "SELECT * FROM products WHERE product_id = ?";
-//            PreparedStatement statement = connection.prepareStatement(sql);
-//            statement.setInt(1, productId);
-//            ResultSet resultSet = statement.executeQuery();
-//            if (resultSet.next()) {
-//                String productName = resultSet.getString("product_name");
-//                double price = resultSet.getDouble("price");
-//                int stock = resultSet.getInt("stock");
-//
-//                if (quantity > stock) {
-//                    System.out.println("Sorry, the requested quantity exceeds the available stock for " + productName + ". Available stock: " + stock);
-//                } else {
-//                    Product product = new Product(productId, productName, price, quantity);
-//                    cart.add(product);
-//                    
-//                    String insertOrderItemSql = "INSERT INTO order_items (product_id, quantity,username) VALUES (?, ?, ?)";
-//                    PreparedStatement insertStatement = connection.prepareStatement(insertOrderItemSql);
-//                    insertStatement.setInt(1, productId);
-//                    insertStatement.setInt(2, quantity);
-//                    insertStatement.setString(3, username);
-//                    insertStatement.executeUpdate();
-//
-//                    String updateStockSql = "UPDATE products SET stock = stock - ? WHERE product_id = ?";
-//                    PreparedStatement updateStatement = connection.prepareStatement(updateStockSql);
-//                    updateStatement.setInt(1, quantity);
-//                    updateStatement.setInt(2, productId);
-//                    updateStatement.executeUpdate();
-//
-//                    System.out.println("Added to cart: " + product);
-//                }
-//            } else {
-//                System.out.println("Product not found.");
-//            }
-//            resultSet.close();
-//            statement.close();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    public void viewCart() {
-//        if (cart.isEmpty()) {
-//            System.out.println("Your cart is empty.");
-//        } else {
-//            System.out.println("Your Cart:");
-//            for (Product item : cart) {
-//                System.out.println(item);
-//            }
-//        }
-//    }
-//        public void placeOrder()throws Exception {
-//            if (cart.isEmpty()) {
-//                System.out.println("Your cart is empty. Unable to place order.");
-//                return;
-//            }Scanner scanner = new Scanner(System.in);
-//                System.out.print("Enter your username: ");
-//                String username=scanner.nextLine();
-//                System.out.print("Enter your shipping address: ");
-//                String shippingAddress = scanner.nextLine();
-//                System.out.print("Enter your phone number: ");
-//               String phonenumber=scanner.nextLine();
-//               
-//            double totalAmount = calculateTotalAmount();
-//            generateBill(username,shippingAddress,phonenumber,totalAmount);
-//            try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/onlineShoppingManagement", "root", "nithinithish18@")) {
-//                String insertOrderSql = "INSERT INTO orders ( username, shipping_address, phone_number, total_amount) VALUES ( ?, ?, ?, ?)";
-//                try (PreparedStatement orderStatement = connection.prepareStatement(insertOrderSql)) {
-//                    orderStatement.setString(1, username);
-//                    orderStatement.setString(2, shippingAddress);
-//                    orderStatement.setString(3, phonenumber);
-//                    orderStatement.setDouble(4, totalAmount);
-//                    int rowsAffected = orderStatement.executeUpdate();
-//                    if (rowsAffected > 0) {
-//                        System.out.println("Order placed successfully!");
-//                        cart.clear();
-//                    } else {
-//                        System.out.println("Failed to place order.");
-//                    }
-//                }
-//            } catch (SQLException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        public double calculateTotalAmount() {
-//            double totalAmount = 0;
-//            for (Product product : cart) {
-//                totalAmount += product.getPrice() * product.getQuantity();
-//            }
-//            return totalAmount;
-//        }
-//            public void generateBill(String username,String shippingAddress,String phonenumber,double totalAmount) {
-//            	System.out.println("-------- Bill --------");
-//            	System.out.println("Customer Name: "+username);
-//            	System.out.println("Shipping Address: "+shippingAddress);
-//            	System.out.println("Phone number: "+phonenumber);
-//                System.out.println("Order Date: " + LocalDateTime.now());
-//                System.out.println("Total Amount: $" + totalAmount);
-//            System.out.println("----------------------");
-//        cart.clear();
-//        }
-//            
-//            public void viewOrder(String username) throws Exception {
-//                try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/onlineShoppingManagement", "root", "nithinithish18@")) {
-//                    Scanner scanner = new Scanner(System.in);
-//                    System.out.print("Enter username: ");
-//                    username = scanner.nextLine();
-//                    String selectOrdersSql = "SELECT orders.order_id, orders.username, orders.shipping_address, orders.phone_number, orders.total_amount, order_items.product_id, products.product_name " +
-//                            "FROM orders " +
-//                            "JOIN order_items ON orders.username = order_items.username " +
-//                            "JOIN products ON order_items.product_id = products.product_id " +
-//                            "WHERE orders.username = ?";
-//                    try (PreparedStatement statement = connection.prepareStatement(selectOrdersSql)) {
-//                        statement.setString(1, username);
-//                        ResultSet resultSet = statement.executeQuery();
-//                        boolean orderFound = false;
-//                        while (resultSet.next()) {
-//                            if (!orderFound) {
-//                                int orderid = resultSet.getInt("order_id");
-//                                username = resultSet.getString("username");
-//                                String shippingAddress = resultSet.getString("shipping_address");
-//                                String phoneNumber = resultSet.getString("phone_number");
-//                                double totalAmount = resultSet.getDouble("total_amount");
-//                                System.out.println("Order ID: " + orderid);
-//                                System.out.println("Customer Name: " + username);
-//                                System.out.println("Shipping Address: " + shippingAddress);
-//                                System.out.println("Phone Number: " + phoneNumber);
-//                                System.out.println("Order Date: " + LocalDateTime.now());
-//                                System.out.println("Total Amount: $" + totalAmount);
-//                                System.out.print("Ordered Product: ");
-//                                orderFound = true;
-//                            }
-//                            int productId = resultSet.getInt("product_id");
-//                            String productName = resultSet.getString("product_name");
-//                            System.out.println(productName);
-//                            System.out.println("Product ID: "+productId);
-//                    }
-//                        if (!orderFound) {
-//                            System.out.println("No orders found for username: " + username);
-//                        }
-//                    }
-//                } catch (SQLException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//          
-//    public static void main(String[] args) throws Exception {
-//        Customer customer = new Customer();
-//        customer.performCustomerProcesses();
-//    }
-//}
-//
-//class Product {
-//    private int id;
-//    private String name;
-//    private double price;
-//    private int quantity;
-//
-//    public Product(int id, String name, double price, int quantity) {
-//        this.id = id;
-//        this.name = name;
-//        this.price = price;
-//        this.quantity = quantity;
-//    }
-//
-//    public int getId() {
-//        return id;
-//    }
-//
-//    public double getPrice() {
-//        return price;
-//    }
-//
-//    public int getQuantity() {
-//        return quantity;
-//    }
-//
-//    @Override
-//    public String toString() {
-//        return "ID: " + id + ", Name: " + name + ", Price: $" + price + ", Quantity: " + quantity;
-//    }
-//}
-//
-//
+
 package onlineshoppingmanagement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -449,8 +174,7 @@ public class Customer {
                         updateStatement.setInt(1, quantity);
                         updateStatement.setInt(2, productId);
                         updateStatement.executeUpdate();
-                    }
-
+		    }
                     System.out.println("Added to cart: " + product);
                 }
             } else {
@@ -460,7 +184,6 @@ public class Customer {
             e.printStackTrace();
         }
     }
-
     public void viewCart() {
         if (cart.isEmpty()) {
             System.out.println("Your cart is empty.");
@@ -471,8 +194,6 @@ public class Customer {
             }
         }
     }
-
-    
     public void placeOrder() throws Exception {
         if (cart.isEmpty()) {
             System.out.println("Your cart is empty. Unable to place order.");
@@ -651,30 +372,28 @@ public class Customer {
         }
     }
 
-			    private void printInvoice(String username, String shippingAddress, String phoneNumber,
-			            LocalDateTime orderDate, List<Product> products, double totalAmount) {
+	  private void printInvoice(String username, String shippingAddress, String phoneNumber,
+		LocalDateTime orderDate, List<Product> products, double totalAmount) {
 			
-			System.out.println("-------- Invoice --------");
-			System.out.println("Customer Name   : " + username);
-			System.out.println("Shipping Address: " + shippingAddress);
-			System.out.println("Phone Number    : " + phoneNumber);
-			System.out.println("Order Date      : " + orderDate.toString().replace("T", " Time "));
-			System.out.println("\nItems Purchased:");
-			System.out.println("------------------------------------------------------------");
-			System.out.printf("%-10s %-20s %-10s %-10s%n", "ID", "Product Name", "Price", "Quantity");
-			System.out.println("------------------------------------------------------------");
+		System.out.println("-------- Invoice --------");
+		System.out.println("Customer Name   : " + username);
+		System.out.println("Shipping Address: " + shippingAddress);
+		System.out.println("Phone Number    : " + phoneNumber);
+		System.out.println("Order Date      : " + orderDate.toString().replace("T", " Time "));
+		System.out.println("\nItems Purchased:");
+		System.out.println("------------------------------------------------------------");
+		System.out.printf("%-10s %-20s %-10s %-10s%n", "ID", "Product Name", "Price", "Quantity");
+		System.out.println("------------------------------------------------------------");
 			
-			for (Product product : products) {
+		 	for (Product product : products) {
 			System.out.printf("%-10d %-20s $%-9.2f %-10d%n",
 			  product.getId(), product.toString().split(",")[1].split(":")[1].trim(), product.getPrice(), product.getQuantity());
 			}
 			
-			System.out.println("------------------------------------------------------------");
-			System.out.printf("Total Amount: $%.2f%n", totalAmount);
-			System.out.println("------------------------------------------------------------\n");
-			}
-			
-
+		System.out.println("------------------------------------------------------------");
+		System.out.printf("Total Amount: $%.2f%n", totalAmount);
+		System.out.println("------------------------------------------------------------\n");
+		}
 
     public static void main(String[] args) throws Exception {
         Customer customer = new Customer();
